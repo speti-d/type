@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import sys
-from PyQt5.QtWidgets import (QApplication, QWidget, QLineEdit, QLabel)
+from PyQt5 import QtWidgets, QtGui, QtCore, Qt
 
-class typeWindow(QWidget):
+class typeWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
         self.initailizeUI()
@@ -15,43 +15,27 @@ class typeWindow(QWidget):
         self.show()
     
     def practiceUI(self):
-        self.resopnse_label = QLabel(self)
+        self.resopnse_label = QtWidgets.QLabel(self)
         self.resopnse_label.setText("No good")
 
-        self.exerciseLine = QLineEdit(self)
+        self.exerciseLine = QtWidgets.QLineEdit(self)
         self.exerciseLine.move(50, 50)
-        # Test text
         self.exerciseLine.setText("Hello")
-        # self.exerciseLine.setEnabled(False)
 
-        self.textInput = QLineEdit(self)
+        self.textInput = typeLineEdit(self)
         self.textInput.move(50, 100)
-        self.textInput.textChanged.connect(self.inputHandler)
-    
-    def inputHandler(self):
-        try:
-            if self.textInput.text()[-1] == " ":
-                # Debug stuff
-                print("new word")
-                wanted_word = self.exerciseLine.text()
-                my_word = self.textInput.text().split()[-1]
-                print(wanted_word, my_word)
-
-                # 
-                if wanted_word == my_word:
-                    self.resopnse_label.setText("Good")
-                else:
-                    self.resopnse_label.setText("no good")
-        except IndexError:
-            pass
         
+class typeLineEdit(QtWidgets.QLineEdit):
+    def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
+        super(typeLineEdit, self).keyPressEvent(event)
+        if event.key() == QtCore.Qt.Key_Space:
+            print("Space was pressed")
 
-    
 
 
 
 ##########################
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     window = typeWindow()
     sys.exit(app.exec_())
