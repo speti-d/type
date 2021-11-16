@@ -50,14 +50,16 @@ class typeWindow(QtWidgets.QWidget):
     
     def startExercise(self):
         self.start_button.setDisabled(True)
+        self.textInput.setDisabled(False)
         self.timeleft = 10; # the time the exercise is meant to take
         self.exercise_timer.start(1000) # timer ticking once every second
         print("exercise started")
-        exercise_text = ""
+        self.exercise_wordlist = []
         with open("words.txt", 'r') as f1:
             wordlist = f1.readline().split(';')
             for n in range(50):
-                exercise_text += random.choice(wordlist) + " "
+                self.exercise_wordlist.append(random.choice(wordlist))
+        exercise_text = " ".join([word for word in self.exercise_wordlist])
         self.exerciseLine.setText(exercise_text)
         self.timer_label.setText(f"Time left: {self.timeleft}")
         self.textInput.clear()
@@ -78,6 +80,7 @@ class typeWindow(QtWidgets.QWidget):
         print("exercise ended")
         self.exercise_timer.stop()
         good_words = 0
+        self.textInput.setDisabled(True)
         exercise_list = self.exerciseLine.toPlainText().split(' ')
         input_list = self.textInput.text().split(' ')
         for index in range(min(len(input_list), len(exercise_list))):
