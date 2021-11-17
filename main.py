@@ -12,11 +12,11 @@ class typeWindow(QtWidgets.QWidget):
         # Place for things like the layoutmanager 
         self.setGeometry(100, 100, 800, 400)
         self.setWindowTitle('Taccs Typer')
-        self.practiceUI()
+        self.setWidgets()
 
         self.show()
     
-    def practiceUI(self):
+    def setWidgets(self):
         # Place for individual widgets
 
         # QTimer to mesure the 1 minute for the exercise
@@ -39,9 +39,9 @@ class typeWindow(QtWidgets.QWidget):
 
         # QTextEdit widget to display 
         self.exerciseLine = QtWidgets.QTextEdit(self)
-        self.exerciseLine.resize(600, 150)
+        self.exerciseLine.resize(600, 50)
         self.exerciseLine.move(50, 50)
-        self.exerciseLine.setFontPointSize(20)
+        self.exerciseLine.setFontPointSize(21)
         self.exerciseLine.setReadOnly(True)
 
         # The lineEdit into we actually want to type
@@ -51,19 +51,55 @@ class typeWindow(QtWidgets.QWidget):
     def startExercise(self):
         self.start_button.setDisabled(True)
         self.textInput.setDisabled(False)
-        self.timeleft = 10; # the time the exercise is meant to take
+        self.timeleft = 60; # the time the exercise is meant to take
         self.exercise_timer.start(1000) # timer ticking once every second
+
         print("exercise started")
+
+        self.currentword = 0
         self.exercise_wordlist = []
-        with open("words.txt", 'r') as f1:
-            wordlist = f1.readline().split(';')
-            for n in range(50):
-                self.exercise_wordlist.append(random.choice(wordlist))
-        exercise_text = " ".join([word for word in self.exercise_wordlist])
-        self.exerciseLine.setText(exercise_text)
+
+        self.getWords(10)
+        self.updateDisplay()
+        
+
         self.timer_label.setText(f"Time left: {self.timeleft}")
         self.textInput.clear()
         self.textInput.setFocus()
+    
+
+    def endExercise(self):
+        print("exercise ended")
+        self.exercise_timer.stop()
+        good_words = 0
+        # self.textInput.setDisabled(True)
+
+        good_words = 0
+        input_list = self.textInput.text().split(' ')
+
+        for index in range(min(len(input_list), len(self.exercise_wordlist))):
+            if self.exercise_wordlist[index] == input_list[index]:
+                good_words += 1
+
+        self.resopnse_label.setText(f"WPM: {good_words}")
+        print(f"WPM {good_words}") # Prints to terminal for now
+        self.start_button.setDisabled(False)
+        # TODO: Connect this to the response label, and calculate wpm
+
+    def updateDisplay(self, start = 0, end = 10):
+        if start < 0:
+            start = 0
+        exercise_text = ""
+        # exercise_text = " ".join([word for word in self.exercise_wordlist])
+        for i in range(start, end):
+            exercise_text += self.exercise_wordlist[i] + " "
+        self.exerciseLine.setText(exercise_text)
+
+    def getWords(self, x):
+        with open("words.txt", 'r') as f1:
+            wordlist = f1.readline().split(';')
+            for n in range(x):
+                self.exercise_wordlist.append(random.choice(wordlist))
     
     def updateTimerClock(self):
         self.timeleft -= 1
@@ -72,25 +108,23 @@ class typeWindow(QtWidgets.QWidget):
             self.endExercise()
     
     def test(self):
-        pass
+        good_words = 0
+        input_list = self.textInput.text().split(' ')
+        self.currentword = len(input_list)
+        self.getWords(1)
+        print(len(self.exercise_wordlist))
+        self.updateDisplay(self.currentword - 1, self.currentword + 9)
+
+        for index in range(min(len(input_list), len(self.exercise_wordlist))):
+            if self.exercise_wordlist[index] == input_list[index]:
+                good_words += 1
+
+        self.resopnse_label.setText(f"WPM: {good_words}")
         # TODO: Rename this and make it edit the displayed text
         # in the exercise TextEdit
-    
-    def endExercise(self):
-        print("exercise ended")
-        self.exercise_timer.stop()
-        good_words = 0
-        self.textInput.setDisabled(True)
-        exercise_list = self.exerciseLine.toPlainText().split(' ')
-        input_list = self.textInput.text().split(' ')
-        for index in range(min(len(input_list), len(exercise_list))):
-            if exercise_list[index] == input_list[index]:
-                good_words += 1
-        self.resopnse_label.setText('WPM: {}'.format(good_words))
-        print('WPM {}'.format(good_words)) # Prints to terminal for now
-        self.start_button.setDisabled(False)
-        # TODO: Connect this to the response label, and calculate wpm
-        
+
+
+
 class typeLineEdit(QtWidgets.QLineEdit):
     def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
         super(typeLineEdit, self).keyPressEvent(event)
